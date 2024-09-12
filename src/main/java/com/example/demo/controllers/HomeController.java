@@ -42,4 +42,9 @@ public class HomeController {
         // RELATIVE To resources/templates
         return "about-us";
     }
+
+    @GetMapping("/contact-us")
+    public String contactUs() {
+        return "contact-us";
+    }
 }

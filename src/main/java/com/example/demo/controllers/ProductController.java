@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.demo.models.Product;
 import com.example.demo.repo.ProductRepo;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class ProductController {
@@ -48,8 +51,16 @@ public class ProductController {
         return "products/create";
     }
 
+    // the results of the validation will be in the bindingResult parameter
     @PostMapping("/products/create")
-    public String processCreateProductForm(@ModelAttribute Product newProduct) {
+    public String processCreateProductForm(@Valid @ModelAttribute Product newProduct, BindingResult bindingResult) {
+        System.out.println(bindingResult);
+        if (bindingResult.hasErrors()) {
+            // re-render the create form if there are any validation errors
+            // and skip the saving of the new product
+            return "products/create";
+        }
+
         // save the new product
         productRepo.save(newProduct);
 

@@ -88,4 +88,11 @@ public class ProductController {
         return "products/edit";
 
     }
+
+    @PostMapping("/products/{id}/edit")
+    public String updateProduct(@PathVariable Long id, @ModelAttribute Product product) {
+        product.setId(id);  // ensure that we are updating the correct id
+        productRepo.save(product);
+        return "redirect:/products";
+    }
 }

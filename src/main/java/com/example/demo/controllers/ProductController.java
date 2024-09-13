@@ -16,6 +16,9 @@ public class ProductController {
     private final ProductRepo productRepo;
 
     @Autowired
+    // Dependency injection = when Spring Boot creates an instance
+    // of ProductController, it will automatically create an instance
+    // of ProductRepo and pass it to the new instance of ProductController
     public ProductController(ProductRepo productRepo) {
         this.productRepo = productRepo;
     }

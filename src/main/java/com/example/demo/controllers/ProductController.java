@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.demo.models.Product;
 import com.example.demo.repo.ProductRepo;
@@ -43,5 +45,14 @@ public class ProductController {
         model.addAttribute("product", newProduct);
 
         return "products/create";
+    }
+
+    @PostMapping("/products/create")
+    public String processCreateProductForm(@ModelAttribute Product newProduct) {
+        // save the new product
+        productRepo.save(newProduct);
+
+        // a redirect tell the client to go a different URL
+        return "redirect:/products";
     }
 }

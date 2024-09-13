@@ -29,4 +29,19 @@ public class ProductController {
         model.addAttribute("products", products);
         return "products/index";
     }
+
+    // When we want to add forms, we always need 2 routes
+    // 1 route to display the form
+    // 1 route to process the form
+    @GetMapping("/products/create")
+    public String showCreateProductForm(Model model) {
+
+        // send an empty instance of the Product model to the template
+        var newProduct = new Product();
+
+        // add the instance of the new product model to the view model
+        model.addAttribute("product", newProduct);
+
+        return "products/create";
+    }
 }

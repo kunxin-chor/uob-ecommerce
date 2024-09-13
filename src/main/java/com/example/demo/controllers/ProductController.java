@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.demo.models.Product;
@@ -54,5 +55,37 @@ public class ProductController {
 
         // a redirect tell the client to go a different URL
         return "redirect:/products";
+    }
+
+    @GetMapping("/products/{id}")
+    public String productDetails(@PathVariable Long id, Model model) {
+
+        // find the product with the matching id
+         Product product = productRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException());
+
+        System.out.println(product);
+
+        // add it to the view model
+        model.addAttribute("product", product);
+
+        // details.html in the products folder
+        return "products/details";
+    }
+
+  
+    // 2. display the form which contains the existing data of the product
+    @GetMapping("/products/{id}/edit")
+    public String showUpdateProduct(@PathVariable Long id, Model model) {
+
+          // 1. find by ID the product that the user wants to update
+          var product = productRepo.findById(id)
+                        .orElseThrow( () -> new RuntimeException("Product Not Found"));
+        
+        // 2. Pass it to the view model
+        model.addAttribute("product", product);
+
+        return "products/edit";
+
     }
 }

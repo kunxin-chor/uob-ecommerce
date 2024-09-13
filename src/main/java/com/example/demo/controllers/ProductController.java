@@ -106,4 +106,26 @@ public class ProductController {
         productRepo.save(product);
         return "redirect:/products";
     }
+
+    // we have two routes for deleting
+    // 1. showing a delete form (asking the user if they really want to delete)
+
+    @GetMapping("/products/{id}/delete")
+    public String showDeleteProductForm(@PathVariable Long id, Model model) {
+
+        // find the product that we want to delete
+        var product = productRepo.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Proudct not found"));
+
+       model.addAttribute("product", product);                 
+
+        return "products/delete";
+    }
+
+    // 2. process the delete
+    @PostMapping("/products/{id}/delete")
+    public String deleteProduct(@PathVariable Long id) {
+        productRepo.deleteById(id);
+        return "redirect:/products";
+    }
 }

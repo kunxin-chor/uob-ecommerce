@@ -16,4 +16,14 @@
         <input type="number" th:field="*{price}" class="form-control"/>
         <div class="invalid-feedback" th:if="${#fields.hasErrors('price')}" th:errors="*{price}" style="display:block;"></div>
     </div>
+    <div>
+        <label>Category</label>
+        <select class="form-control" th:field="*{category}" required>
+            <option th:each="category : ${categories}" 
+                th:value="${category.id}"
+                th:text="${category.name}"
+            >   
+            </option>
+        </select>
+    </div>
 </div>

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.demo.models.Product;
 import com.example.demo.repo.ProductRepo;
+import com.example.demo.repo.CategoryRepo;
 
 import jakarta.validation.Valid;
 
@@ -20,18 +21,20 @@ import jakarta.validation.Valid;
 public class ProductController {
 
     private final ProductRepo productRepo;
+    private final CategoryRepo categoryRepo;
 
     @Autowired
     // Dependency injection = when Spring Boot creates an instance
     // of ProductController, it will automatically create an instance
     // of ProductRepo and pass it to the new instance of ProductController
-    public ProductController(ProductRepo productRepo) {
+    public ProductController(ProductRepo productRepo, CategoryRepo categoryRepo) {
         this.productRepo = productRepo;
+        this.categoryRepo = categoryRepo;
     }
     
     @GetMapping("/products")
     public String listProducts(Model model) {
-        List<Product> products = productRepo.findAll();
+        List<Product> products = productRepo.findAllWithCategories();
         model.addAttribute("products", products);
         return "products/index";
     }
@@ -45,6 +48,9 @@ public class ProductController {
         // send an empty instance of the Product model to the template
         var newProduct = new Product();
 
+        // find all the categories and add it to the view model 
+        model.addAttribute("categories", categoryRepo.findAll());
+
         // add the instance of the new product model to the view model
         model.addAttribute("product", newProduct);
 
@@ -53,9 +59,14 @@ public class ProductController {
 
     // the results of the validation will be in the bindingResult parameter
     @PostMapping("/products/create")
-    public String processCreateProductForm(@Valid @ModelAttribute Product newProduct, BindingResult bindingResult) {
+    public String processCreateProductForm(@Valid @ModelAttribute Product newProduct, 
+        BindingResult bindingResult,
+        Model model) {
         System.out.println(bindingResult);
         if (bindingResult.hasErrors()) {
+            
+            model.addAttribute("categories", categoryRepo.findAll());
+            
             // re-render the create form if there are any validation errors
             // and skip the saving of the new product
             return "products/create";
@@ -89,9 +100,13 @@ public class ProductController {
     @GetMapping("/products/{id}/edit")
     public String showUpdateProduct(@PathVariable Long id, Model model) {
 
-          // 1. find by ID the product that the user wants to update
-          var product = productRepo.findById(id)
+        // 1. find by ID the product that the user wants to update
+        var product = productRepo.findById(id)
                         .orElseThrow( () -> new RuntimeException("Product Not Found"));
+
+        // find all the categories
+        model.addAttribute("categories", categoryRepo.findAll());
+        
         
         // 2. Pass it to the view model
         model.addAttribute("product", product);
@@ -101,8 +116,17 @@ public class ProductController {
     }
 
     @PostMapping("/products/{id}/edit")
-    public String updateProduct(@PathVariable Long id, @ModelAttribute Product product) {
+    public String updateProduct(@PathVariable Long id, 
+            @Valid @ModelAttribute Product product, 
+            BindingResult bindingResult, Model model) {
         product.setId(id);  // ensure that we are updating the correct id
+        
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("product", product);
+            model.addAttribute("categories",categoryRepo.findAll());
+            return "redirect:/products/" + id + "/edit";
+        }
+        
         productRepo.save(product);
         return "redirect:/products";
     }

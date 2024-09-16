@@ -16,14 +16,14 @@ public class SecurityConfig {
     // Think of it as a "factory method" that Spring Boot will use later, sometimes internally.
     // to create an instance of a component that it needs
     // If Spring Boot ever needs an object of the class `SecurityFilterChain`, it will call this method
-    @SuppressWarnings("removal")
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // the `httpSecurity` class allows us to define security rules
         http.authorizeHttpRequests(authz -> 
             // all of these URLs can be accessed without login
             authz.requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll() 
-            .anyRequest().permitAll()
+            .anyRequest().authenticated()  // switch to .permitAll() to allow access by non-authenticated users
         )
         .formLogin(form -> 
             form.loginPage("/login")
@@ -33,9 +33,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+   
     
 }

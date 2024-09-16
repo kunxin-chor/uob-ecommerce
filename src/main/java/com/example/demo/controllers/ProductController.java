@@ -40,7 +40,7 @@ public class ProductController {
     
     @GetMapping("/products")
     public String listProducts(Model model) {
-        List<Product> products = productRepo.findAllWithCategories();
+        List<Product> products = productRepo.findAllWithCategoriesAndTags();
         model.addAttribute("products", products);
         return "products/index";
     }
@@ -77,6 +77,7 @@ public class ProductController {
         if (bindingResult.hasErrors()) {
             
             model.addAttribute("categories", categoryRepo.findAll());
+            model.addAttribute("allTags", tagRepo.findAll());
             
             // re-render the create form if there are any validation errors
             // and skip the saving of the new product
@@ -123,6 +124,9 @@ public class ProductController {
 
         // find all the categories
         model.addAttribute("categories", categoryRepo.findAll());
+
+        // find all the tags and add them to the view model
+        model.addAttribute("allTags", tagRepo.findAll());
         
         
         // 2. Pass it to the view model
@@ -135,15 +139,25 @@ public class ProductController {
     @PostMapping("/products/{id}/edit")
     public String updateProduct(@PathVariable Long id, 
             @Valid @ModelAttribute Product product, 
+            @RequestParam List<Long> tagIds,
             BindingResult bindingResult, Model model) {
         product.setId(id);  // ensure that we are updating the correct id
         
         if (bindingResult.hasErrors()) {
             model.addAttribute("product", product);
             model.addAttribute("categories",categoryRepo.findAll());
+            model.addAttribute("allTags", tagRepo.findAll());
             return "redirect:/products/" + id + "/edit";
         }
         
+        // update the tags on the product
+        if (tagIds != null && !tagIds.isEmpty()) {
+            var tags = new HashSet<Tag>(tagRepo.findAllById(tagIds));
+            product.setTags(tags);
+        }  else {
+            product.getTags().clear();
+        }
+
         productRepo.save(product);
         return "redirect:/products";
     }

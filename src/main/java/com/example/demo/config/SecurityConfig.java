@@ -23,7 +23,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authz -> 
             // all of these URLs can be accessed without login
             authz.requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll() 
-            .anyRequest().authenticated()
+            .anyRequest().permitAll()
         )
         .formLogin(form -> 
             form.loginPage("/login")

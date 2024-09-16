@@ -1,6 +1,7 @@
 package com.example.demo.controllers;
 
 import java.util.List;
+import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,9 +11,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.demo.models.Product;
+import com.example.demo.models.Tag;
 import com.example.demo.repo.ProductRepo;
+import com.example.demo.repo.TagRepo;
 import com.example.demo.repo.CategoryRepo;
 
 import jakarta.validation.Valid;
@@ -22,14 +26,16 @@ public class ProductController {
 
     private final ProductRepo productRepo;
     private final CategoryRepo categoryRepo;
+    private final TagRepo tagRepo;
 
     @Autowired
     // Dependency injection = when Spring Boot creates an instance
     // of ProductController, it will automatically create an instance
     // of ProductRepo and pass it to the new instance of ProductController
-    public ProductController(ProductRepo productRepo, CategoryRepo categoryRepo) {
+    public ProductController(ProductRepo productRepo, CategoryRepo categoryRepo, TagRepo tagRepo) {
         this.productRepo = productRepo;
         this.categoryRepo = categoryRepo;
+        this.tagRepo = tagRepo;
     }
     
     @GetMapping("/products")
@@ -54,6 +60,9 @@ public class ProductController {
         // add the instance of the new product model to the view model
         model.addAttribute("product", newProduct);
 
+        // get all the tags and add it to the view model
+        model.addAttribute("allTags", tagRepo.findAll());
+
         return "products/create";
     }
 
@@ -61,8 +70,10 @@ public class ProductController {
     @PostMapping("/products/create")
     public String processCreateProductForm(@Valid @ModelAttribute Product newProduct, 
         BindingResult bindingResult,
-        Model model) {
-        System.out.println(bindingResult);
+        Model model,
+        @RequestParam(required=false) List<Long> tagIds
+        ) {
+    
         if (bindingResult.hasErrors()) {
             
             model.addAttribute("categories", categoryRepo.findAll());
@@ -70,6 +81,12 @@ public class ProductController {
             // re-render the create form if there are any validation errors
             // and skip the saving of the new product
             return "products/create";
+        }
+
+        // check if the user has selected any tags
+        if (tagIds != null) {
+            var tags = new HashSet<Tag>(tagRepo.findAllById(tagIds));
+            newProduct.setTags(tags);
         }
 
         // save the new product

@@ -14,7 +14,7 @@ th:replace="
 
 <th:block th:fragment="content">
     <div>
-        <form method="POST" th:object="${user}" action="@{/register}">
+        <form method="POST" th:object="${user}" th:action="@{/register}">
             <div>
                 <label>Username:</label>
                 <input type="text" th:field="*{username}" class="form-control">

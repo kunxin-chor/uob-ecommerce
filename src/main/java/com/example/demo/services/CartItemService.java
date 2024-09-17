@@ -1,5 +1,7 @@
 package com.example.demo.services;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.example.demo.models.CartItem;
@@ -22,6 +24,25 @@ public class CartItemService {
     // for any reason, all database writes and updates will be undo
     @Transactional 
     public CartItem addToCart(User user, Product product, int quantity) {
-        return null;
+
+        // check if the product already exists in the cart
+        Optional<CartItem> existingItem = cartItemRepo.findByUserAndProduct(user, product);
+
+
+        // if the product already exists in the cart
+        if (existingItem.isPresent()) {
+            // to get the actual item from the Optional, we have
+            // use .get()
+            CartItem cartItem = existingItem.get();
+            cartItem.setQuantity(cartItem.getQuantity() + 1);
+            return cartItemRepo.save(cartItem);
+
+        } else {
+            // if the product is not in the cart
+            CartItem newItem = new CartItem(user, product, quantity);
+            return cartItemRepo.save(newItem);
+        }
+
+
     }
 }

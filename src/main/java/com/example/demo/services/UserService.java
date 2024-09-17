@@ -27,6 +27,10 @@ public class UserService implements UserDetailsService{
         this.passwordEncoder = passwordEncoder;
     }
 
+    public User findUserByUsername(String username) {
+        return userRepo.findByUsername(username);
+    }
+
     public User registerNewUser(User user) {
         System.out.println("registering new user");
         // before we save the user to the database, we have to

@@ -60,6 +60,11 @@ public class CartItemService {
                     .orElseThrow( () -> new IllegalArgumentException("No cart item with that id exists"));
         existingItem.setQuantity(newQuantity);
         cartItemRepo.save(existingItem);
-         
+
+    }
+
+    @Transactional
+    public void removeFromCart(long cartItemId, User user) {
+        cartItemRepo.deleteByIdAndUser(cartItemId, user);
     }
 }

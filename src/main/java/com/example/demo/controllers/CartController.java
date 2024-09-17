@@ -95,6 +95,26 @@ public class CartController {
             return "redirect:/cart";
         }
 
+
+     
     }
+
+    @GetMapping("/{cartItemId}/remove")
+    public String removeFromCart(@PathVariable long cartItemId,
+        Principal principal,
+        RedirectAttributes redirectAttributes) {
+            
+            try {
+                var user = userService.findUserByUsername(principal.getName());
+                cartItemService.removeFromCart(cartItemId, user);
+                redirectAttributes.addFlashAttribute("message", "The item has been deleted");
+             
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+               
+            }
+            return "redirect:/cart";
+            
+        }
 
 }

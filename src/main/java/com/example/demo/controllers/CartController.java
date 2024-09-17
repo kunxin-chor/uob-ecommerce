@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,37 +40,34 @@ public class CartController {
     // - redirect attributes are for the flash message
     @PostMapping("/add")
     public String addToCart(@RequestParam Long productId,
-                            @RequestParam(defaultValue = "1") int quantity,
-                            Principal principal,
-                            RedirectAttributes redirectAttributes
+            @RequestParam(defaultValue = "1") int quantity,
+            Principal principal,
+            RedirectAttributes redirectAttributes
 
-    
     ) {
 
         try {
-        // get the current logged in user
-        User user = userService.findUserByUsername(principal.getName());
+            // get the current logged in user
+            User user = userService.findUserByUsername(principal.getName());
 
-        // find the product
-        // .orElseThrow() -> performs a .get(); however if .isPresent() returns false
-        // throws an exception
-        Product product = productService.findById(productId).orElseThrow( () -> 
-            new IllegalArgumentException("Product not found")
-        );
+            // find the product
+            // .orElseThrow() -> performs a .get(); however if .isPresent() returns false
+            // throws an exception
+            Product product = productService.findById(productId)
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
-        cartItemService.addToCart(user, product, quantity);
+            cartItemService.addToCart(user, product, quantity);
 
-        redirectAttributes.addFlashAttribute("message", 
-                String.format("Added %d %s to your cart", quantity, product.getName()));
+            redirectAttributes.addFlashAttribute("message",
+                    String.format("Added %d %s to your cart", quantity, product.getName()));
 
-        return "redirect:/cart";
+            return "redirect:/cart";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error",
-                String.format("Error when adding product: %s", e.getMessage())
-            );
+                    String.format("Error when adding product: %s", e.getMessage()));
             return "redirect:/products";
         }
-    
+
     }
 
     @GetMapping("")
@@ -80,4 +78,23 @@ public class CartController {
 
         return "cart/index";
     }
+
+    @PostMapping("/{cartItemId}/updateQuantity")
+    public String updateQuantity(@PathVariable long cartItemId,
+            @RequestParam int newQuantity,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            User user = userService.findUserByUsername(principal.getName());
+            cartItemService.updateQuantity(cartItemId, user, newQuantity);
+            redirectAttributes.addFlashAttribute("message", "Quantity updated");
+            return "redirect:/cart";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/cart";
+        }
+
+    }
+
 }

@@ -52,4 +52,14 @@ public class CartItemService {
         // ex: recommendations, discount code, out of stock notice, price changes
         return cartItemRepo.findByUser(user);
     }
+
+
+    @Transactional
+    public void updateQuantity(long cartItemId, User user, int newQuantity) {
+        CartItem existingItem = cartItemRepo.findByUserAndId(user, cartItemId)
+                    .orElseThrow( () -> new IllegalArgumentException("No cart item with that id exists"));
+        existingItem.setQuantity(newQuantity);
+        cartItemRepo.save(existingItem);
+         
+    }
 }

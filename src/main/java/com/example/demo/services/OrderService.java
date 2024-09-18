@@ -22,6 +22,8 @@ public class OrderService {
         // Get the session from the event
         Session session = (Session) event.getDataObjectDeserializer().getObject().get();
         String sessionId = session.getId();
+        long userId = Long.valueOf(session.getClientReferenceId());
+        System.out.println("Userid =" + userId);
         try {
 
             // expand each line item

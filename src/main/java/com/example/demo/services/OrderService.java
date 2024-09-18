@@ -46,6 +46,7 @@ public class OrderService {
                 orderedProducts.put(productId, quantity);
             }
 
+            System.out.println(orderedProducts);
 
 
         } catch (StripeException e) {

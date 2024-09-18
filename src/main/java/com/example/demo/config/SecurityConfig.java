@@ -20,10 +20,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // the `httpSecurity` class allows us to define security rules
-        http.authorizeHttpRequests(authz -> 
+        http
+        .csrf( csrf -> csrf.ignoringRequestMatchers("/stripe/webhook"))
+        .authorizeHttpRequests(authz -> 
             // all of these URLs can be accessed without login
-            authz.requestMatchers("/register", "/login", "/css/**", "/js/**").permitAll() 
+            authz
+            .requestMatchers("/register", "/login", "/css/**", "/js/**", "/stripe/webhook").permitAll() 
             .anyRequest().authenticated()  // switch to .permitAll() to allow access by non-authenticated users
+           
         )
         .formLogin(form -> 
             form.loginPage("/login")
